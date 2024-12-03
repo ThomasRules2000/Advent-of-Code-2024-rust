@@ -43,8 +43,8 @@ fn parse(input : &str) -> Option<(Vec<u32>, Vec<u32>)> {
 
     for line in input.lines() {
         let (num1, num2) = line.split_whitespace().collect_tuple().unwrap();
-        list1.push(num1.parse().ok()?);
-        list2.push(num2.parse().ok()?);
+        list1.push(num1.parse().unwrap());
+        list2.push(num2.parse().unwrap());
     }
 
     list1.sort();
