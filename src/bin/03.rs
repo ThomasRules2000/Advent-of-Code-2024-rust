@@ -5,60 +5,47 @@ advent_of_code::solution!(3);
 
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
-        parser(input)
-            .into_iter()
-            .filter_map(|instr| match instr {
-                Instruction::Mul(x, y) => Some(x * y),
-                _ => None,
+        Regex::new(r"mul\(\d+\,\d+\)")
+            .unwrap()
+            .find_iter(input)
+            .map(|x| {
+                let (x, y): (u32, u32) = x.as_str()[4..x.len() - 1]
+                    .split(",")
+                    .map(|n| n.parse().unwrap())
+                    .collect_tuple()
+                    .unwrap();
+                x * y
             })
             .sum(),
     )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let instrs = parser(input);
-
     let mut result = 0;
     let mut enabled = true;
-    for instr in instrs {
-        match instr {
-            Instruction::Do => enabled = true,
-            Instruction::Dont => enabled = false,
-            Instruction::Mul(x, y) => if enabled {
-                result += x * y;
+    for m in Regex::new(r"mul\(\d+\,\d+\)|do\(\)|don't\(\)")
+        .unwrap()
+        .find_iter(input)
+    {
+        let x = m.as_str();
+        match &x[..3] {
+            "mul" => {
+                if enabled {
+                    let (x, y) = x[4..x.len() - 1]
+                        .split(",")
+                        .map(|n| n.parse::<u32>().unwrap())
+                        .collect_tuple()
+                        .unwrap();
+                    result += x * y;
+                }
             }
+            "do(" => enabled = true,
+            "don" => enabled = false,
+            _ => unreachable!(),
         }
     }
 
     Some(result)
-}
-
-#[derive(Debug)]
-enum Instruction {
-    Mul(u32, u32),
-    Do,
-    Dont,
-}
-
-fn parser(input: &str) -> Vec<Instruction> {
-    Regex::new(r"(mul\(\d{1,3}\,\d{1,3}\))|(do\(\))|(don't\(\))")
-        .ok()
-        .unwrap()
-        .find_iter(input)
-        .map(|x| {
-            let x = x.as_str();
-            match x.get(..3).unwrap() {
-                "mul" => {
-                    let x = x.get(4..x.len() - 1).unwrap();
-                    let (x, y) = x.split(",").collect_tuple().unwrap();
-                    Instruction::Mul(x.parse().unwrap(), y.parse().unwrap())
-                }
-                "do(" => Instruction::Do,
-                "don" => Instruction::Dont,
-                _ => unreachable!(),
-            }
-        })
-        .collect()
 }
 
 #[cfg(test)]
