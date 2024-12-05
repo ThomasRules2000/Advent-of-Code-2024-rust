@@ -7,19 +7,18 @@ use itertools::Itertools;
 advent_of_code::solution!(1);
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (list1, list2) = parse(input)?;
-    zip(list1, list2).map(|(x, y)| x.abs_diff(y)).reduce(|acc, e| acc + e)
+    let (list1, list2) = parse(input);
+    Some(zip(list1, list2).map(|(x, y)| x.abs_diff(y)).sum())
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (list1, list2) = parse(input)?;
+    let (list1, list2) = parse(input);
 
     let mut i1 = list1.chunk_by(|x, y| x == y);
     let mut i2 = list2.chunk_by(|x, y| x == y);
 
     let mut res = 0;
-
-    let _ : Option<()> = try {
+    let _: Option<()> = try {
         loop {
             let mut x1 = i1.next()?;
             let mut x2 = i2.next()?;
@@ -32,25 +31,26 @@ pub fn part_two(input: &str) -> Option<u32> {
                 }
             }
             res += x1[0] * x1.len() as u32 * x2.len() as u32;
-        };
+        }
     };
     Some(res)
 }
 
-fn parse(input : &str) -> Option<(Vec<u32>, Vec<u32>)> {
-    let mut list1: Vec<u32> = vec![];
-    let mut list2: Vec<u32> = vec![];
+fn parse(input: &str) -> (Vec<u32>, Vec<u32>) {
+    let (mut list1, mut list2): (Vec<_>, Vec<_>) = input
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|n| n.parse::<u32>().unwrap())
+                .collect_tuple()
+                .unwrap()
+        })
+        .unzip();
 
-    for line in input.lines() {
-        let (num1, num2) = line.split_whitespace().collect_tuple().unwrap();
-        list1.push(num1.parse().unwrap());
-        list2.push(num2.parse().unwrap());
-    }
+    list1.sort_unstable();
+    list2.sort_unstable();
 
-    list1.sort();
-    list2.sort();
-
-    Some((list1, list2))
+    (list1, list2)
 }
 
 #[cfg(test)]
