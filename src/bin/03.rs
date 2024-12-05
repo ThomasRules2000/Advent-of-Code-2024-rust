@@ -1,47 +1,79 @@
-use itertools::Itertools;
-use regex::Regex;
+#![feature(slice_split_once)]
+
+use core::str;
 
 advent_of_code::solution!(3);
 
 pub fn part_one(input: &str) -> Option<u32> {
-    Some(
-        Regex::new(r"mul\(\d+\,\d+\)")
-            .unwrap()
-            .find_iter(input)
-            .map(|x| {
-                let (x, y): (u32, u32) = x.as_str()[4..x.len() - 1]
-                    .split(",")
-                    .map(|n| n.parse().unwrap())
-                    .collect_tuple()
-                    .unwrap();
-                x * y
-            })
-            .sum(),
-    )
+    let input = input.as_bytes();
+
+    let mut result = 0;
+
+    let mut i = 0;
+    while i < input.len() - 3 {
+        match &input[i..i + 4] {
+            b"mul(" => {
+                i += 4;
+                let Some((num1_str, rest)) = input[i..].split_once(|x| *x == b',') else {
+                    continue;
+                };
+                let Some((num2_str, _)) = rest.split_once(|x| *x == b')') else {
+                    continue;
+                };
+                let Ok(num1) = str::from_utf8(num1_str).unwrap().parse::<u32>() else {
+                    continue;
+                };
+                let Ok(num2) = str::from_utf8(num2_str).unwrap().parse::<u32>() else {
+                    continue;
+                };
+                result += num1 * num2;
+            }
+            _ => i += 1,
+        }
+    }
+
+    Some(result)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+fn part_two(input: &str) -> Option<u32> {
+    let input = input.as_bytes();
+
     let mut result = 0;
     let mut enabled = true;
-    for m in Regex::new(r"mul\(\d+\,\d+\)|do\(\)|don't\(\)")
-        .unwrap()
-        .find_iter(input)
-    {
-        let x = m.as_str();
-        match &x[..3] {
-            "mul" => {
+
+    let mut i = 0;
+    while i < input.len() - 3 {
+        match &input[i..i + 4] {
+            b"mul(" => {
+                i += 4;
                 if enabled {
-                    let (x, y) = x[4..x.len() - 1]
-                        .split(",")
-                        .map(|n| n.parse::<u32>().unwrap())
-                        .collect_tuple()
-                        .unwrap();
-                    result += x * y;
+                    let Some((num1_str, rest)) = input[i..].split_once(|x| *x == b',') else {
+                        continue;
+                    };
+                    let Some((num2_str, _)) = rest.split_once(|x| *x == b')') else {
+                        continue;
+                    };
+                    let Ok(num1) = str::from_utf8(num1_str).unwrap().parse::<u32>() else {
+                        continue;
+                    };
+                    let Ok(num2) = str::from_utf8(num2_str).unwrap().parse::<u32>() else {
+                        continue;
+                    };
+                    result += num1 * num2;
                 }
             }
-            "do(" => enabled = true,
-            "don" => enabled = false,
-            _ => unreachable!(),
+            b"do()" => {
+                i += 4;
+                enabled = true;
+            }
+            b"don'" => {
+                i += 4;
+                if &input[i..i + 3] == b"t()" {
+                    i += 3;
+                    enabled = false;
+                }
+            }
+            _ => i += 1,
         }
     }
 

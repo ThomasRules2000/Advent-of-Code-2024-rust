@@ -82,7 +82,7 @@ fn parser(input: &str) -> Vec<&[u8]> {
 }
 
 fn is_xmas(input: &[u8]) -> bool {
-    input == "XMAS".as_bytes() || input == "SAMX".as_bytes()
+    input == b"XMAS" || input == b"SAMX"
 }
 
 #[cfg(test)]
