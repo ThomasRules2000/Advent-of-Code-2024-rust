@@ -30,3 +30,8 @@ tinyjson = "2.5.1"
 # Solution dependencies
 itertools = "0.13.0"
 regex = "1.11.1"
+ndarray = "0.14.0"
+strum = "0.26.3"
+strum_macros = "0.26.3"
+ilog = "1.0.1"
+gcd = "2.3.0"
